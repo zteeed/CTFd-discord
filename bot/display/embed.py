@@ -72,22 +72,25 @@ async def categories(self):
 
 async def category(self, context):
     self.lock = True
-    args = get_command_args(context)
 
-    if len(args) != 1:
+    args = get_command_args(context)
+    category = ' '.join(args)
+    category = unescape(category.strip())
+    if len(args) < 1:
         tosend = 'Use !category <category>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
-    tosend = show.display_category(args[0], self.bot)
-    embed_name = f"Category {args[0]}"
+    tosend = show.display_category(category, self.bot)
+    embed_name = f"Category {category}"
     await interrupt(self, tosend, embed_color=0xB315A8, embed_name=embed_name)
 
 
 async def who_solved(self, context):
     self.lock = True
 
-    challenge = ' '.join(context.message.content.strip().split(' ')[1:])
+    args = get_command_args(context)
+    challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
     if not challenge_selected:
         tosend = 'Use !who_solved <challenge>'
@@ -102,7 +105,8 @@ async def who_solved(self, context):
 async def problem(self, context):
     self.lock = True
 
-    challenge = ' '.join(context.message.content.strip().split(' ')[1:])
+    args = get_command_args(context)
+    challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
     if not challenge_selected:
         tosend = 'Use !problem <challenge>'
