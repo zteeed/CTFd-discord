@@ -48,7 +48,15 @@ def get_categories(s: Session, tables: CTFdTables) -> List[str]:
     return sorted([item[0] for item in categories])
 
 
+def category_exists(s: Session, tables: CTFdTables, category: str) -> bool:
+    challenges = s.query(tables.challenges). \
+            filter(tables.challenges.category == category).first()
+    return challenges is not None
+
+
 def get_category_info(s: Session, tables: CTFdTables, category_name: str) -> List[Dict]:
+    if not category_exists(s, tables, category_name):
+        return None
     challenges = s.query(tables.challenges).filter_by(category=category_name). \
         order_by(desc(tables.challenges.value)).all()
     category_info = []
@@ -126,8 +134,6 @@ def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> List
 def diff(s: Session, tables: CTFdTables, user1: str, user2: str) -> Tuple[List[Dict], List[Dict]]:
     users = get_users(s, tables, type='user') + get_users(s, tables, type='admin')
     user1, user2 = user1.strip(), user2.strip()
-    if user1 not in users or user2 not in users:
-        return None, None
     solved_challenges_1 = challenges_solved_by_user(s, tables, user1)
     solved_challenges_2 = challenges_solved_by_user(s, tables, user2)
     all_challs = solved_challenges_1 + solved_challenges_2
@@ -151,16 +157,17 @@ def track_user(s: Session, tables: CTFdTables, user: str) -> List[str]:
 
 def get_challenges_solved(s: Session, tables: CTFdTables) -> List:
     # Changer admin en False plus tard
-    challenges = s.query(tables.solves). \
-        join(tables.challenges, tables.challenges.id == tables.solves.chalid). \
-        join(tables.teams, tables.teams.id == tables.solves.teamid). \
-        filter(tables.teams.admin == True). \
-        order_by(desc(tables.solves.date)).all()
+    challenges = s.query(tables.submissions). \
+        join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
+        join(tables.users, tables.users.id == tables.submissions.user_id). \
+        filter(tables.submissions.type == 'correct'). \
+        filter(tables.users.type == 'admin'). \
+        order_by(desc(tables.submissions.date)).all()
     return challenges
 
 
 def get_tag(challenge: Any) -> str:
-    tag_value = f'{challenge.teams.id} | {challenge.challenges.id}'
+    tag_value = f'{challenge.users.id} | {challenge.challenges.id}'
     return hashlib.sha224(tag_value.encode()).hexdigest()
 
 
@@ -188,9 +195,9 @@ def get_new_challenges(s: Session, tables: CTFdTables, tag: str) -> Tuple[str, D
     if len(selected_challenges) > 0:
         item = selected_challenges[0]
         new_tag = get_tag(item)
-        new_challenge = dict(username=item.teams.name, challenge=item.challenges.name, value=item.challenges.value,
+        new_challenge = dict(username=item.users.name, challenge=item.challenges.name, value=item.challenges.value,
                              date=item.date)
-        #  log.debug(f'New solve', username=item.teams.name, challenge=item.challenges.name, date=item.date)
+        #  log.debug(f'New solve', username=item.users.name, challenge=item.challenges.name, date=item.date)
         return new_tag, new_challenge
     else:
         return tag, new_challenge
