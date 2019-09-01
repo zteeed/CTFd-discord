@@ -116,11 +116,11 @@ def display_last_days(bot, days_num, username):
 
 def display_diff(bot, user1, user2):
     if not database_data.user_exists(bot.db.session, bot.db.tables, user1):
-        tosend = f'User {user1} is not in team.'
+        tosend = f'User {user1} does not exists.'
         tosend_list = [{'user': user1, 'msg': tosend}]
         return tosend_list
     if not database_data.user_exists(bot.db.session, bot.db.tables, user2):
-        tosend = f'User {user2} is not in team.'
+        tosend = f'User {user2} does not exists.'
         tosend_list = [{'user': user2, 'msg': tosend}]
         return tosend_list
 
