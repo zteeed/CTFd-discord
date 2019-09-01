@@ -26,10 +26,9 @@ class CTFdBot:
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
             if not self.lock and self.channel is not None:
-                log.debug('CTFdBot open')
                 await display.cron(self)
             else:
-                log.debug('RootMeBot locked')
+                pass
             await asyncio.sleep(1)
 
     def catch(self):
