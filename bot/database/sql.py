@@ -8,7 +8,7 @@ from typing import Any, Tuple
 
 def get_sqlalchemy_engine(db_uri: str) -> Tuple[Any, Any]:
     Base = automap_base()
-    engine = create_engine(f'sqlite:///{db_uri}')
+    engine = create_engine(db_uri)
     Base.prepare(engine, reflect=True)
     return engine, Base
 

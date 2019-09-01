@@ -1,6 +1,5 @@
 bot_channel = 'ctf-news'
-data_uri = 'tests/ctfd.db'
-db_uri = 'tests/ctfd.db'
+db_uri = 'mysql+pymysql://root:ctfd@127.0.0.1:3306/ctfd'
 emoji1 = 'dab'
 emoji2 = 'ok_hand'
 emoji3 = 'thinking'
