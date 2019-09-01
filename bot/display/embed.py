@@ -114,11 +114,11 @@ async def problem(self, context):
         return
 
     tosend = show.display_problem(self.bot, context, challenge_selected)
-    if 'Cannot find authors' in tosend:
+    if tosend.startswith('Ping:'):
+        await interrupt(self, tosend, embed_color=None, embed_name=None)
+    else:
         embed_name = f'Problem with "{challenge_selected}" ?'
         await interrupt(self, tosend, embed_color=0x29C1C5, embed_name=embed_name)
-    else:
-        await interrupt(self, tosend, embed_color=None, embed_name=None)
 
 
 async def display_by_blocks_duration(self, tosend_list, color, duration_msg=''):
