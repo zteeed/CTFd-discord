@@ -1,0 +1,6 @@
+asyncio
+discord
+discord.py
+pytest
+sqlalchemy
+structlog
