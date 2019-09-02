@@ -15,7 +15,6 @@ class CTFdBot:
         """ Discord Bot to catch CTFd events made by zTeeed """
         self.bot = commands.Bot(command_prefix='>>')
         self.channel = None
-        self.lock = False
 
         self.bot.db = lambda: None  # empty object
         self.bot.db.session = None
@@ -25,10 +24,8 @@ class CTFdBot:
     async def cron(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
-            if not self.lock and self.channel is not None:
+            if self.channel is not None and self.bot.db.session is not None:
                 await display.cron(self)
-            else:
-                pass
             await asyncio.sleep(1)
 
     def catch(self):
