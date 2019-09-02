@@ -38,48 +38,57 @@ class CTFdBot:
             self.bot.db.tables = get_sqlalchemy_tables(base)
 
         @self.bot.command(description='Show ranking of CTFd (20 first players)')
-        async def scoreboard(context):
+        async def scoreboard(context: commands.context.Context):
             """ """
+            log.info("Command executed", name=context.command)
             await display.scoreboard(self)
 
         @self.bot.command(description='Show ranking of CTFd.')
-        async def scoreboard_complete(context):
+        async def scoreboard_complete(context: commands.context.Context):
             """ """
+            log.info("Command executed", name=context.command)
             await display.scoreboard(self, all_players=True)
 
         @self.bot.command(description='Show list of categories.')
-        async def categories(context):
+        async def categories(context: commands.context.Context):
             """ """
+            log.info("Command executed", name=context.command)
             await display.categories(self)
 
         @self.bot.command(description='Show list of challenges from a category.')
-        async def category(context):
+        async def category(context: commands.context.Context):
             """ <category> """
+            log.info("Command executed", name=context.command)
             await display.category(self, context)
 
         @self.bot.command(description='Return who solved a specific challenge.')
-        async def problem(context):
+        async def problem(context: commands.context.Context):
             """ <challenge> """
+            log.info("Command executed", name=context.command)
             await display.problem(self, context)
 
         @self.bot.command(description='Return who solved a specific challenge.')
-        async def who_solved(context):
+        async def who_solved(context: commands.context.Context):
             """ <challenge> """
+            log.info("Command executed", name=context.command)
             await display.who_solved(self, context)
 
         @self.bot.command(description='Return challenges solved grouped by users for last day.')
-        async def solved_last_days(context):
+        async def solved_last_days(context: commands.context.Context):
             """ <number_of_days> (<username>) """
+            log.info("Command executed", name=context.command)
             await display.last_days(self, context)
 
         @self.bot.command(description='Return difference of solved challenges between two users.')
-        async def diff(context):
+        async def diff(context: commands.context.Context):
             """ <username1> <username2> """
+            log.info("Command executed", name=context.command)
             await display.diff(self, context)
 
         @self.bot.command(description='Flush all data from bot channel excepted events')
-        async def flush(context):
+        async def flush(context: commands.context.Context):
             """ """
+            log.info("Command executed", name=context.command)
             await display.flush(self, context)
 
     def start(self):
