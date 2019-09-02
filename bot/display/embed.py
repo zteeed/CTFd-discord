@@ -183,6 +183,6 @@ async def flush(self, context):
 
 
 async def cron(self):
-    name, tosend_cron = await show.display_cron(self.bot)
+    name, tosend_cron, embed_color = await show.display_cron(self.bot)
     if tosend_cron is not None:
-        await interrupt(self, tosend_cron, embed_color=0xFFCC00, embed_name=name)
+        await interrupt(self, tosend_cron, embed_color=embed_color, embed_name=name)

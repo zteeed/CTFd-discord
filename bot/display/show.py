@@ -142,12 +142,23 @@ async def display_flush(channel, context):
     return f'Data from channel has been flushed successfully by {context.author}.'
 
 
-async def display_cron(bot: Any) -> Tuple[Any, Any]:
+async def display_cron(bot: Any) -> Tuple[Any, Any, Any]:
     tag, challenge = database_data.get_new_challenges(bot.db.session, bot.db.tables, bot.db.tag)
     bot.db.tag = tag
     if challenge:
         name = f'New challenge solved by {challenge["username"]}'
         tosend = f' • {challenge["challenge"]} ({challenge["value"]} points)'
         tosend += f'\n • Date: {challenge["date"]}'
-        return name, tosend
-    return None, None
+        return name, tosend, 0xFFCC00
+    challenges_id = bot.db.challenges
+    test_challenges_id = database_data.get_visible_challenges(bot.db.session, bot.db.tables)
+    if test_challenges_id == challenges_id:
+        return None, None, None
+    else:
+        new_challenges_id = [id for id in test_challenges_id if id not in challenges_id]
+        tosend = ''
+        for id in new_challenges_id:
+            (name, value, category) = database_data.get_challenge_info(bot.db.session, bot.db.tables, id)
+            tosend += f' • {name} ({value} points) - category {category}'
+        bot.db.challenges = new_challenges_id
+        return "New challenge available", tosend, 0x16B841
