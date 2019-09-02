@@ -184,20 +184,6 @@ async def diff(self, context):
     await display_by_blocks_diff(self, tosend_list, 0xFF00FF)
 
 
-async def diff_with(self, context):
-    self.lock = True
-    args = get_command_args(context)
-
-    if len(args) != 1:
-        tosend = 'Use !diff_with <username>'
-        await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
-        return
-
-    pseudo = args[0]
-    tosend_list = show.display_diff_with(self.bot, pseudo)
-    await display_by_blocks_diff(self, tosend_list, 0xFF00FF)
-
-
 async def flush(self, context):
     self.lock = True
     embed_color, embed_name = 0xD81948, 'FLUSH'
