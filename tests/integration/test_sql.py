@@ -1,14 +1,15 @@
+import datetime
 from typing import Dict, List
-from sqlalchemy.orm import Session
-from bot.database.tables import CTFdTables
 
 import pytest
-import datetime
+from sqlalchemy.orm import Session
 
 from bot.database.sql import get_sqlalchemy_engine, get_sqlalchemy_session, get_sqlalchemy_tables
-from bot.manage.database_data import get_ctf_name, get_false_submissions, get_scoreboard, get_users, get_categories, \
-    get_category_info, user_exists, challenge_exists, get_authors_challenge, get_users_solved_challenge, \
-    get_challenges_solved_during, challenges_solved_by_user, diff, track_user
+from bot.database.tables import CTFdTables
+from bot.manage.database_data import get_ctf_name, get_false_submissions, get_visible_challenges, get_challenge_info, \
+    get_scoreboard, get_users, get_categories, get_category_info, user_exists, challenge_exists, \
+    get_authors_challenge, get_users_solved_challenge, get_challenges_solved_during, challenges_solved_by_user, diff, \
+    track_user
 
 
 @pytest.fixture
@@ -121,6 +122,17 @@ def test_ctf_name(session: Session, tables: CTFdTables):
 
 def test_false_submissions(session: Session, tables: CTFdTables):
     assert [('zTeeed', 'Challenge2', 'NotTheFlag')] == get_false_submissions(session, tables)
+
+
+def test_visible_challenges(session: Session, tables: CTFdTables):
+    assert [1, 2] == get_visible_challenges(session, tables)
+
+
+def test_challenge_info(session: Session, tables: CTFdTables):
+    assert get_challenge_info(session, tables, 0) is None
+    assert ('Challenge1', 50, 'Category1') == get_challenge_info(session, tables, 1)
+    assert ('Challenge2', 50, 'Category2') == get_challenge_info(session, tables, 2)
+    assert get_challenge_info(session, tables, 3) is None
 
 
 def test_scoreboard_user(session: Session, tables: CTFdTables):

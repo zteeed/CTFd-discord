@@ -26,6 +26,16 @@ def get_false_submissions(s: Session, tables: CTFdTables) -> List[Dict]:
     return query
 
 
+def get_visible_challenges(s: Session, tables: CTFdTables) -> List[int]:
+    challenges_id = s.query(tables.challenges.id).filter(tables.challenges.state == 'visible').all()
+    return [int(i[0]) for i in challenges_id]
+
+
+def get_challenge_info(s: Session, tables: CTFdTables, id: int) -> Optional[Tuple[str, str, str]]:
+    return s.query(tables.challenges.name, tables.challenges.value, tables.challenges.category). \
+        filter(tables.challenges.id == id).first()
+
+
 def get_scoreboard(s: Session, tables: CTFdTables, type: str = 'user') -> List[Dict]:
     scoreboard = s.query(tables.users.name, func.sum(tables.challenges.value).label('score')). \
         join(tables.solves, tables.users.id == tables.solves.user_id). \

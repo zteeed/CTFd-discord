@@ -5,6 +5,7 @@ from discord.ext import commands
 from bot import log
 from bot.constants import db_uri, token
 from bot.database.sql import get_sqlalchemy_engine, get_sqlalchemy_session, get_sqlalchemy_tables
+from bot.manage.database_data import get_visible_challenges
 import bot.display.embed as display
 from bot.manage.discord_data import get_channel
 
@@ -20,6 +21,7 @@ class CTFdBot:
         self.bot.db.session = None
         self.bot.db.tables = None
         self.bot.db.tag = None  # hash of string composed of last challenge solve user id and challenge id
+        self.bot.db.challenges = None  # list of visible challenges id
 
     async def cron(self):
         await self.bot.wait_until_ready()
@@ -36,6 +38,7 @@ class CTFdBot:
             await display.ready(self, engine)
             self.bot.db.session = get_sqlalchemy_session(engine)
             self.bot.db.tables = get_sqlalchemy_tables(base)
+            self.bot.db.challenges = get_visible_challenges(self.bot.db.session, self.bot.db.tables)
 
         @self.bot.command(description='Show ranking of CTFd (20 first players)')
         async def scoreboard(context: commands.context.Context):
