@@ -75,13 +75,19 @@ def challenge_exists(s: Session, tables: CTFdTables, challenge: str) -> bool:
     return challenge is not None
 
 
-def get_authors_challenge(s: Session, tables: CTFdTables, challenge: str) -> List[Tuple[str]]:
+def get_authors_challenge(s: Session, tables: CTFdTables, challenge: str) -> List[Tuple[Any, Any]]:
     if not challenge_exists(s, tables, challenge):
         return None
     description = s.query(tables.challenges.description).filter(tables.challenges.name == challenge).first()
     if description is not None:
         description = description[0]
-    return re.findall(r'@(\w+)#(\d+)', description)
+    result = re.findall(r'@(\w+)#(\d+)', description)
+    if result:
+        return result
+    result = re.findall(r'(.*?)#(\d+)', description)
+    if not result:
+        return result
+    return [(name.split(' ')[-1].replace('@', ''), id) for (name, id) in result]
 
 
 def get_users_solved_challenge(s: Session, tables: CTFdTables, challenge: str, type: str = 'user'):
