@@ -70,15 +70,15 @@ async def category(self, context):
     self.lock = True
 
     args = get_command_args(context)
-    category = ' '.join(args)
-    category = unescape(category.strip())
+    category_name = ' '.join(args)
+    category_name = unescape(category_name.strip())
     if len(args) < 1:
         tosend = f'Use {self.bot.command_prefix}category <category>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
-    tosend = show.display_category(category, self.bot)
-    embed_name = f"Category {category}"
+    tosend = show.display_category(category_name, self.bot)
+    embed_name = f"Category {category_name}"
     await interrupt(self, tosend, embed_color=0xB315A8, embed_name=embed_name)
 
 
