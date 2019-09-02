@@ -15,7 +15,7 @@ def display(part):
         print(line)
 
 
-async def interrupt(self, message, embed_color=None, embed_name=None, keep_locking=False):
+async def interrupt(self, message, embed_color=None, embed_name=None):
     parts = show.display_parts(message)
     for part in parts:
 
@@ -26,10 +26,6 @@ async def interrupt(self, message, embed_color=None, embed_name=None, keep_locki
             embed = discord.Embed(color=embed_color)
             embed.add_field(name=embed_name, value=part, inline=False)
             await self.channel.send(embed=embed)
-
-    if not keep_locking:
-        self.lock = False
-    return
 
 
 def check(self, engine):
@@ -167,7 +163,7 @@ async def display_by_blocks_diff(self, tosend_list, color):
     for block in tosend_list:
         if block['msg']:
             embed_name = f"Challenges solved by {block['user']} "
-            await interrupt(self, block['msg'], embed_color=color, embed_name=embed_name, keep_locking=True)
+            await interrupt(self, block['msg'], embed_color=color, embed_name=embed_name)
 
 
 async def diff(self, context):
