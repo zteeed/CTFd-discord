@@ -160,6 +160,10 @@ async def last_days(self, context):
 
 
 async def display_by_blocks_diff(self, tosend_list, color):
+    if not any([block['msg'] for block in tosend_list]):  # msg is empty for all blocks
+        tosend = 'There is no difference of challenge solved between those players.'
+        await interrupt(self, tosend, embed_color=color, embed_name='DIFF')
+        return
     for block in tosend_list:
         if block['msg']:
             embed_name = f"Challenges solved by {block['user']} "
