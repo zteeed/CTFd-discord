@@ -13,7 +13,7 @@ from bot.manage.database_data import get_ctf_name, get_false_submissions, get_sc
 
 @pytest.fixture
 def db_uri() -> str:
-    return 'ctfd.db'
+    return 'sqlite:///ctfd.db'
 
 
 @pytest.fixture

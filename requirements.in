@@ -1,6 +1,7 @@
 asyncio
 discord
 discord.py
+pymysql
 pytest
 sqlalchemy
 structlog
