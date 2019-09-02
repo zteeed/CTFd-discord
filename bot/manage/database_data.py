@@ -148,7 +148,7 @@ def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> Opti
 
 
 def diff(s: Session, tables: CTFdTables, user1: str, user2: str) -> Tuple[List[Dict], List[Dict]]:
-    users = get_users(s, tables, type='user') + get_users(s, tables, type='admin')
+    users = get_users(s, tables, type='user') + get_users(s, tables, type='user')
     if user1 not in users or user2 not in users:
         return None, None
     user1, user2 = user1.strip(), user2.strip()
@@ -174,12 +174,11 @@ def track_user(s: Session, tables: CTFdTables, user: str) -> List[str]:
 
 
 def get_challenges_solved(s: Session, tables: CTFdTables) -> List:
-    # Changer admin en False plus tard
     challenges = s.query(tables.submissions). \
         join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
         join(tables.users, tables.users.id == tables.submissions.user_id). \
         filter(tables.submissions.type == 'correct'). \
-        filter(tables.users.type == 'admin'). \
+        filter(tables.users.type == 'user'). \
         order_by(desc(tables.submissions.date)).all()
     return challenges
 

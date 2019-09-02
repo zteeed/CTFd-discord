@@ -22,7 +22,7 @@ def display_parts(message):
 
 def display_scoreboard(bot, all_players=False):
     tosend = ''
-    users_data = database_data.get_scoreboard(bot.db.session, bot.db.tables, type='admin')
+    users_data = database_data.get_scoreboard(bot.db.session, bot.db.tables, type='user')
     if not all_players:
         users_data = users_data[:20]
     for rank, user_data in enumerate(users_data):
@@ -59,7 +59,7 @@ def display_who_solved(bot, challenge_selected):
     if not database_data.challenge_exists(bot.db.session, bot.db.tables, challenge_selected):
         return f'Challenge {challenge_selected} does not exists.'
     tosend = ''
-    users = database_data.get_users_solved_challenge(bot.db.session, bot.db.tables, challenge_selected, type='admin')
+    users = database_data.get_users_solved_challenge(bot.db.session, bot.db.tables, challenge_selected, type='user')
     for user in users:
         tosend += f' • {user}\n'
     if not tosend:
