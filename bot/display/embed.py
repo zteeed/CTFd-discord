@@ -77,7 +77,7 @@ async def category(self, context):
     category = ' '.join(args)
     category = unescape(category.strip())
     if len(args) < 1:
-        tosend = 'Use !category <category>'
+        tosend = f'Use {self.bot.command_prefix}category <category>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
@@ -93,7 +93,7 @@ async def who_solved(self, context):
     challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
     if not challenge_selected:
-        tosend = 'Use !who_solved <challenge>'
+        tosend = f'Use {self.bot.command_prefix}who_solved <challenge>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
@@ -109,7 +109,7 @@ async def problem(self, context):
     challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
     if not challenge_selected:
-        tosend = 'Use !problem <challenge>'
+        tosend = f'Use {self.bot.command_prefix}problem <challenge>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
@@ -142,13 +142,14 @@ async def last_days(self, context):
     args = get_command_args(context)
 
     if len(args) < 1 or len(args) > 2:
-        tosend = f'Use !solved_last_days <number_of_days> (<username>)'
+        tosend = f'Use {self.bot.command_prefix}solved_last_days <number_of_days> (<username>)'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
     days_num = args[0]
     if not days_num.isdigit() or int(days_num) < 1:
-        tosend = f'<number_of_days> is an integer >= 1.\nUse !solved_last_days <number_of_days> (<username>)'
+        tosend = f'<number_of_days> is an integer >= 1.\nUse {self.bot.command_prefix}solved_last_days ' \
+            f'<number_of_days> (<username>) '
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
@@ -174,7 +175,7 @@ async def diff(self, context):
     args = get_command_args(context)
 
     if len(args) != 2:
-        tosend = 'Use !diff <username1> <username2>'
+        tosend = f'Use {self.bot.command_prefix}diff <username1> <username2>'
         await interrupt(self, tosend, embed_color=0xD81948, embed_name="ERROR")
         return
 
@@ -200,7 +201,7 @@ async def diff_with(self, context):
 async def flush(self, context):
     self.lock = True
     embed_color, embed_name = 0xD81948, 'FLUSH'
-    tosend = f'{context.author} just launched !flush command.'
+    tosend = f'{context.author} just launched {self.bot.command_prefix}flush command.'
     await interrupt(self, tosend, embed_color=embed_color, embed_name=embed_name)
     tosend = await show.display_flush(self.channel, context)
     await interrupt(self, tosend, embed_color=embed_color, embed_name=embed_name)
