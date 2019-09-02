@@ -55,20 +55,16 @@ async def ready(self, engine):
 
 
 async def scoreboard(self, all_players=False):
-    self.lock = True
     tosend = show.display_scoreboard(self.bot, all_players=all_players)
     await interrupt(self, tosend, embed_color=0x4200d4, embed_name="Scoreboard")
 
 
 async def categories(self):
-    self.lock = True
     tosend = show.display_categories(self.bot)
     await interrupt(self, tosend, embed_color=0xB315A8, embed_name="Categories")
 
 
 async def category(self, context):
-    self.lock = True
-
     args = get_command_args(context)
     category_name = ' '.join(args)
     category_name = unescape(category_name.strip())
@@ -83,8 +79,6 @@ async def category(self, context):
 
 
 async def who_solved(self, context):
-    self.lock = True
-
     args = get_command_args(context)
     challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
@@ -99,8 +93,6 @@ async def who_solved(self, context):
 
 
 async def problem(self, context):
-    self.lock = True
-
     args = get_command_args(context)
     challenge = ' '.join(args)
     challenge_selected = unescape(challenge.strip())
@@ -134,7 +126,6 @@ async def display_by_blocks_duration(self, tosend_list, color, duration_msg=''):
 
 
 async def last_days(self, context):
-    self.lock = True
     args = get_command_args(context)
 
     if len(args) < 1 or len(args) > 2:
@@ -171,7 +162,6 @@ async def display_by_blocks_diff(self, tosend_list, color):
 
 
 async def diff(self, context):
-    self.lock = True
     args = get_command_args(context)
 
     if len(args) != 2:
@@ -185,7 +175,6 @@ async def diff(self, context):
 
 
 async def flush(self, context):
-    self.lock = True
     embed_color, embed_name = 0xD81948, 'FLUSH'
     tosend = f'{context.author} just launched {self.bot.command_prefix}flush command.'
     await interrupt(self, tosend, embed_color=embed_color, embed_name=embed_name)
@@ -194,8 +183,6 @@ async def flush(self, context):
 
 
 async def cron(self):
-    self.lock = True
     name, tosend_cron = await show.display_cron(self.bot)
     if tosend_cron is not None:
         await interrupt(self, tosend_cron, embed_color=0xFFCC00, embed_name=name)
-    self.lock = False
