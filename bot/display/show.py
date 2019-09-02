@@ -45,7 +45,7 @@ def display_categories(bot):
 
 def display_category(category, bot):
     category_info = database_data.get_category_info(bot.db.session, bot.db.tables, category)
-    if category_info is None:
+    if not category_info:
         tosend = f'Category {category} does not exists.'
         return tosend
 

@@ -4,7 +4,7 @@ import re
 import socket
 import struct
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
@@ -50,13 +50,13 @@ def get_categories(s: Session, tables: CTFdTables) -> List[str]:
 
 def category_exists(s: Session, tables: CTFdTables, category: str) -> bool:
     challenges = s.query(tables.challenges). \
-            filter(tables.challenges.category == category).first()
+        filter(tables.challenges.category == category).first()
     return challenges is not None
 
 
 def get_category_info(s: Session, tables: CTFdTables, category_name: str) -> List[Dict]:
     if not category_exists(s, tables, category_name):
-        return None
+        return []
     challenges = s.query(tables.challenges).filter_by(category=category_name). \
         order_by(desc(tables.challenges.value)).all()
     category_info = []
@@ -124,7 +124,7 @@ def get_challenges_solved_during(s: Session, tables: CTFdTables, days: int = 1, 
     return result_challenges_solved
 
 
-def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> List[Dict]:
+def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> Optional[List[Dict]]:
     if not user_exists(s, tables, user):
         return None
     solved_challenges = s.query(tables.submissions). \
@@ -139,6 +139,8 @@ def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> List
 
 def diff(s: Session, tables: CTFdTables, user1: str, user2: str) -> Tuple[List[Dict], List[Dict]]:
     users = get_users(s, tables, type='user') + get_users(s, tables, type='admin')
+    if user1 not in users or user2 not in users:
+        return None, None
     user1, user2 = user1.strip(), user2.strip()
     solved_challenges_1 = challenges_solved_by_user(s, tables, user1)
     solved_challenges_2 = challenges_solved_by_user(s, tables, user2)
