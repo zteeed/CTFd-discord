@@ -136,21 +136,34 @@ def test_challenge_info(session: Session, tables: CTFdTables):
 
 
 def test_scoreboard_user(session: Session, tables: CTFdTables):
-    scoreboard = get_scoreboard(session, tables, type='user')
+    scoreboard = get_scoreboard(session, tables, user_type='user')
     assert [{'username': 'user1', 'score': 50}, {'username': 'user2', 'score': 50}] == scoreboard
 
 
 def test_scoreboard_admin(session: Session, tables: CTFdTables):
-    scoreboard = get_scoreboard(session, tables, type='admin')
+    scoreboard = get_scoreboard(session, tables, user_type='admin')
     assert [{'username': 'zTeeed', 'score': 50}] == scoreboard
 
 
+def test_scoreboard_all(session: Session, tables: CTFdTables):
+    scoreboard = get_scoreboard(session, tables, user_type='all')
+    assert scoreboard == [
+        {'username': 'zTeeed', 'score': 50},
+        {'username': 'user1', 'score': 50},
+        {'username': 'user2', 'score': 50}
+    ]
+
+
 def test_get_users(session: Session, tables: CTFdTables):
-    assert ['user1', 'user2'] == get_users(session, tables, type='user')
+    assert ['user1', 'user2'] == get_users(session, tables, user_type='user')
 
 
-def test_admins(session: Session, tables: CTFdTables):
-    assert ['zTeeed'] == get_users(session, tables, type='admin')
+def test_get_admins(session: Session, tables: CTFdTables):
+    assert ['zTeeed'] == get_users(session, tables, user_type='admin')
+
+
+def test_get_all(session: Session, tables: CTFdTables):
+    assert ['zTeeed', 'user1', 'user2'] == get_users(session, tables, user_type='all')
 
 
 def test_categories(session: Session, tables: CTFdTables):
@@ -177,52 +190,121 @@ def test_challenge_exists(session, tables):
 def test_authors_challenge(session: Session, tables: CTFdTables):
     assert [('SymLiNK', '2835')] == get_authors_challenge(session, tables, 'Challenge1')
     assert [] == get_authors_challenge(session, tables, 'Challenge2')
-    assert get_authors_challenge(session, tables, 'Challenge42') is None
+    assert [] == get_authors_challenge(session, tables, 'Challenge42')
 
 
 def test_users_solved_challenge(session: Session, tables: CTFdTables):
-    assert ['user1'] == get_users_solved_challenge(session, tables, 'Challenge1', type='user')
-    assert ['zTeeed'] == get_users_solved_challenge(session, tables, 'Challenge1', type='admin')
-    assert ['user2'] == get_users_solved_challenge(session, tables, 'Challenge2', type='user')
-    assert [] == get_users_solved_challenge(session, tables, 'Challenge2', type='admin')
-    assert get_users_solved_challenge(session, tables, 'Challenge42', type='user') is None
-    assert get_users_solved_challenge(session, tables, 'Challenge42', type='admin') is None
+    assert ['user1'] == get_users_solved_challenge(session, tables, 'Challenge1', user_type='user')
+    assert ['zTeeed'] == get_users_solved_challenge(session, tables, 'Challenge1', user_type='admin')
+    assert ['zTeeed', 'user1'] == get_users_solved_challenge(session, tables, 'Challenge1', user_type='all')
+    assert ['user2'] == get_users_solved_challenge(session, tables, 'Challenge2', user_type='user')
+    assert [] == get_users_solved_challenge(session, tables, 'Challenge2', user_type='admin')
+    assert ['user2'] == get_users_solved_challenge(session, tables, 'Challenge2', user_type='all')
+    assert get_users_solved_challenge(session, tables, 'Challenge42', user_type='user') is None
+    assert get_users_solved_challenge(session, tables, 'Challenge42', user_type='admin') is None
+    assert get_users_solved_challenge(session, tables, 'Challenge42', user_type='all') is None
 
 
 def test_challenges_solved_during(session: Session, tables: CTFdTables):
-    assert get_challenges_solved_during(session, tables, 99999, type='user') == [
-        {'username': 'user1',
-         'challenges': [{'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 47, 50, 572382)}]
-         },
-        {'username': 'user2',
-         'challenges': [{'name': 'Challenge2', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 8, 785247)}]
-         }
+    assert get_challenges_solved_during(session, tables, 99999, user_type='user') == [
+        {
+            'username': 'user1',
+            'challenges': [
+                {'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 47, 50, 572382)}
+            ]
+        },
+        {
+            'username': 'user2',
+            'challenges': [
+                {'name': 'Challenge2', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 8, 785247)}
+            ]
+        }
     ]
-    assert get_challenges_solved_during(session, tables, 99999, type='admin') == [
-        {'username': 'zTeeed',
-         'challenges': [{'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 27, 905696)}]
-         }
+    assert get_challenges_solved_during(session, tables, 99999, user_type='admin') == [
+        {
+            'username': 'zTeeed',
+            'challenges': [
+                {'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 27, 905696)}
+            ]
+        }
+    ]
+    assert get_challenges_solved_during(session, tables, 99999, user_type='all') == [
+        {
+            'username': 'zTeeed',
+            'challenges': [
+                {'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 27, 905696)}
+            ]
+        },
+        {
+            'username': 'user1',
+            'challenges': [
+                {'name': 'Challenge1', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 47, 50, 572382)}
+            ]
+        },
+        {
+            'username': 'user2',
+            'challenges': [
+                {'name': 'Challenge2', 'value': 50, 'date': datetime.datetime(2019, 8, 15, 18, 48, 8, 785247)}
+            ]
+        }
     ]
 
 
 def test_challenges_solved_by_user(session, tables):
-    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'zTeeed')
-    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'user1')
-    assert [{'name': 'Challenge2', 'value': 50}] == challenges_solved_by_user(session, tables, 'user2')
-    assert challenges_solved_by_user(session, tables, 'user42') is None
+    assert [] == challenges_solved_by_user(session, tables, 'zTeeed', user_type='user')
+    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'zTeeed',
+                                                                              user_type='admin')
+    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'zTeeed',
+                                                                              user_type='all')
+    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'user1',
+                                                                              user_type='user')
+    assert [] == challenges_solved_by_user(session, tables, 'user1', user_type='admin')
+    assert [{'name': 'Challenge1', 'value': 50}] == challenges_solved_by_user(session, tables, 'user1',
+                                                                              user_type='all')
+    assert [{'name': 'Challenge2', 'value': 50}] == challenges_solved_by_user(session, tables, 'user2',
+                                                                              user_type='user')
+    assert [] == challenges_solved_by_user(session, tables, 'user2', user_type='admin')
+    assert [{'name': 'Challenge2', 'value': 50}] == challenges_solved_by_user(session, tables, 'user2',
+                                                                              user_type='all')
+    assert [] == challenges_solved_by_user(session, tables, 'user42', user_type='user')
+    assert [] == challenges_solved_by_user(session, tables, 'user42', user_type='admin')
+    assert [] == challenges_solved_by_user(session, tables, 'user42', user_type='all')
 
 
 def test_diff(session, tables):
     assert ([{'name': 'Challenge1', 'value': 50}],
-            [{'name': 'Challenge2', 'value': 50}]) == diff(session, tables, 'user1', 'user2')
-    assert (None, None) == diff(session, tables, 'user1', 'user42')
-    assert ([], []) == diff(session, tables, 'zTeeed', 'user1')
+            [{'name': 'Challenge2', 'value': 50}]) == diff(session, tables, 'user1', 'user2', user_type='user')
+    assert ([], []) == diff(session, tables, 'user1', 'user2', user_type='admin')
     assert ([{'name': 'Challenge1', 'value': 50}],
-            [{'name': 'Challenge2', 'value': 50}]) == diff(session, tables, 'zTeeed', 'user2')
+            [{'name': 'Challenge2', 'value': 50}]) == diff(session, tables, 'user1', 'user2', user_type='all')
+
+    assert ([], []) == diff(session, tables, 'user1', 'user42', user_type='user')
+    assert ([], []) == diff(session, tables, 'user1', 'user42', user_type='admin')
+    assert ([], []) == diff(session, tables, 'user1', 'user42', user_type='all')
+
+    assert ([], []) == diff(session, tables, 'zTeeed', 'user1', user_type='user')
+    assert ([], []) == diff(session, tables, 'zTeeed', 'user1', user_type='admin')
+    assert ([], []) == diff(session, tables, 'zTeeed', 'user1', user_type='all')
+
+    assert ([], []) == diff(session, tables, 'zTeeed', 'user2', user_type='user')
+    assert ([], []) == diff(session, tables, 'zTeeed', 'user2', user_type='admin')
+    assert ([{'name': 'Challenge1', 'value': 50}],
+            [{'name': 'Challenge2', 'value': 50}]) == diff(session, tables, 'zTeeed', 'user2', user_type='all')
 
 
 def test_track_user(session, tables):
-    assert ['127.0.0.1'] == track_user(session, tables, 'zTeeed')
-    assert ['127.0.0.1'] == track_user(session, tables, 'user1')
-    assert ['127.0.0.1'] == track_user(session, tables, 'user2')
-    assert track_user(session, tables, 'user42') is None
+    assert [] == track_user(session, tables, 'zTeeed', user_type='user')
+    assert ['127.0.0.1'] == track_user(session, tables, 'zTeeed', user_type='admin')
+    assert ['127.0.0.1'] == track_user(session, tables, 'zTeeed', user_type='all')
+
+    assert ['127.0.0.1'] == track_user(session, tables, 'user1', user_type='user')
+    assert [] == track_user(session, tables, 'user1', user_type='admin')
+    assert ['127.0.0.1'] == track_user(session, tables, 'user1', user_type='all')
+
+    assert ['127.0.0.1'] == track_user(session, tables, 'user2', user_type='user')
+    assert [] == track_user(session, tables, 'user2', user_type='admin')
+    assert ['127.0.0.1'] == track_user(session, tables, 'user2', user_type='all')
+
+    assert [] == track_user(session, tables, 'user42', user_type='user')
+    assert [] == track_user(session, tables, 'user42', user_type='admin')
+    assert [] == track_user(session, tables, 'user42', user_type='all')

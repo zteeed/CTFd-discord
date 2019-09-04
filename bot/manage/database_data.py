@@ -17,13 +17,12 @@ def get_ctf_name(s: Session, tables: CTFdTables) -> str:
 
 
 def get_false_submissions(s: Session, tables: CTFdTables) -> List[Dict]:
-    query = s.query(tables.users.name, tables.challenges.name, tables.submissions.provided). \
+    return s.query(tables.users.name, tables.challenges.name, tables.submissions.provided). \
         join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
         join(tables.users, tables.users.id == tables.submissions.user_id). \
         filter(tables.submissions.type == 'incorrect'). \
         group_by(tables.challenges.id). \
         all()
-    return query
 
 
 def get_visible_challenges(s: Session, tables: CTFdTables) -> List[int]:
@@ -36,20 +35,21 @@ def get_challenge_info(s: Session, tables: CTFdTables, id: int) -> Optional[Tupl
         filter(tables.challenges.id == id).first()
 
 
-def get_scoreboard(s: Session, tables: CTFdTables, type: str = 'user') -> List[Dict]:
+def get_scoreboard(s: Session, tables: CTFdTables, user_type: str = 'all') -> List[Dict]:
     scoreboard = s.query(tables.users.name, func.sum(tables.challenges.value).label('score')). \
         join(tables.solves, tables.users.id == tables.solves.user_id). \
-        join(tables.challenges, tables.challenges.id == tables.solves.challenge_id). \
-        filter(tables.users.type == type). \
-        group_by(tables.users.id). \
-        all()
+        join(tables.challenges, tables.challenges.id == tables.solves.challenge_id)
+    if user_type != 'all':
+        scoreboard = scoreboard.filter(tables.users.type == user_type)
+    scoreboard = scoreboard.group_by(tables.users.id).all()
 
     score_list = [dict(username=username, score=score_user) for (username, score_user) in scoreboard]
     return sorted(score_list, key=lambda item: item['score'], reverse=True)
 
 
-def get_users(s: Session, tables: CTFdTables, type: str = 'user') -> List[str]:
-    scoreboard = get_scoreboard(s, tables, type=type)
+def get_users(s: Session, tables: CTFdTables, user_type: str = 'all') -> List[str]:
+    # users with a null score will not be displayed
+    scoreboard = get_scoreboard(s, tables, user_type=user_type)
     return [item['username'] for item in scoreboard]
 
 
@@ -75,20 +75,27 @@ def get_category_info(s: Session, tables: CTFdTables, category_name: str) -> Lis
     return category_info
 
 
-def user_exists(s: Session, tables: CTFdTables, user: str) -> bool:
-    user = s.query(tables.users).filter(tables.users.name == user).first()
-    return user is not None
+def user_exists(s: Session, tables: CTFdTables, user: str, user_type: str = 'all') -> bool:
+    query = s.query(tables.users)
+    if user_type != 'all':
+        query = query.filter(tables.users.type == user_type)
+    query = query.filter(tables.users.name == user).first()
+    return query is not None
 
 
 def challenge_exists(s: Session, tables: CTFdTables, challenge: str) -> bool:
-    challenge = s.query(tables.challenges).filter(tables.challenges.name == challenge).first()
-    return challenge is not None
+    query = s.query(tables.challenges). \
+        filter(tables.challenges.name == challenge). \
+        first()
+    return query is not None
 
 
 def get_authors_challenge(s: Session, tables: CTFdTables, challenge: str) -> List[Tuple[Any, Any]]:
     if not challenge_exists(s, tables, challenge):
-        return None
-    description = s.query(tables.challenges.description).filter(tables.challenges.name == challenge).first()
+        return []
+    description = s.query(tables.challenges.description). \
+        filter(tables.challenges.name == challenge). \
+        first()
     if description is not None:
         description = description[0]
     result = re.findall(r'@(\w+)#(\d+)', description)
@@ -97,35 +104,39 @@ def get_authors_challenge(s: Session, tables: CTFdTables, challenge: str) -> Lis
     result = re.findall(r'(.*?)#(\d+)', description)
     if not result:
         return result
-    return [(name.split(' ')[-1].replace('@', ''), id) for (name, id) in result]
+    return [(name.split(' ')[-1].replace('@', ''), user_id) for (name, user_id) in result]
 
 
-def get_users_solved_challenge(s: Session, tables: CTFdTables, challenge: str, type: str = 'user'):
+def get_users_solved_challenge(s: Session, tables: CTFdTables, challenge: str, user_type: str = 'all'):
     if not challenge_exists(s, tables, challenge):
         return None
-    users = get_users(s, tables, type=type)
+    users = get_users(s, tables, user_type=user_type)
     users_solves = s.query(tables.users.name). \
         join(tables.solves, tables.users.id == tables.solves.user_id). \
         join(tables.challenges, tables.challenges.id == tables.solves.challenge_id). \
-        filter(tables.challenges.name == challenge). \
-        filter(tables.users.type == type). \
-        all()
+        filter(tables.challenges.name == challenge)
+    if user_type != 'all':
+        users_solves.filter(tables.users.type == user_type)
+    users_solves = users_solves.all()
+
     users_solves = [item[0] for item in users_solves]
     # sort users by their rank in the scoreboard
     return [user for user in users if user in users_solves]
 
 
-def get_challenges_solved_during(s: Session, tables: CTFdTables, days: int = 1, type: str = 'user') -> List[Dict]:
+def get_challenges_solved_during(s: Session, tables: CTFdTables, days: int = 1, user_type: str = 'all') -> List[Dict]:
     date_reference = (datetime.now() - timedelta(days=days))  # %y-%m-%d %H:%M:%S
     solved_challenges = s.query(tables.submissions). \
         join(tables.users, tables.users.id == tables.submissions.user_id). \
         join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
-        filter(tables.users.type == type). \
         filter(tables.submissions.type == 'correct'). \
-        filter(tables.submissions.date > date_reference). \
-        order_by(desc(tables.submissions.date)). \
-        all()
-    users = get_users(s, tables, type=type)
+        filter(tables.submissions.date > date_reference)
+    if user_type != 'all':
+        solved_challenges = solved_challenges.filter(tables.users.type == user_type)
+    solved_challenges = solved_challenges. \
+        order_by(desc(tables.submissions.date)).all()
+
+    users = get_users(s, tables, user_type=user_type)
     result_challenges_solved = []
     for user in users:
         solved_during_days = [dict(name=solve.challenges.name, value=solve.challenges.value, date=solve.date)
@@ -134,9 +145,9 @@ def get_challenges_solved_during(s: Session, tables: CTFdTables, days: int = 1, 
     return result_challenges_solved
 
 
-def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> Optional[List[Dict]]:
-    if not user_exists(s, tables, user):
-        return None
+def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str, user_type: str = 'all') -> List[Dict]:
+    if not user_exists(s, tables, user, user_type=user_type):
+        return []
     solved_challenges = s.query(tables.submissions). \
         join(tables.users, tables.users.id == tables.submissions.user_id). \
         join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
@@ -147,23 +158,24 @@ def challenges_solved_by_user(s: Session, tables: CTFdTables, user: str) -> Opti
     return [dict(name=item.challenges.name, value=item.challenges.value) for item in solved_challenges]
 
 
-def diff(s: Session, tables: CTFdTables, user1: str, user2: str) -> Tuple[List[Dict], List[Dict]]:
-    users = get_users(s, tables, type='user') + get_users(s, tables, type='user')
+def diff(s: Session, tables: CTFdTables, user1: str, user2: str, user_type: str = 'all') -> Tuple[
+    List[Dict], List[Dict]]:
+    users = get_users(s, tables, user_type=user_type)
     if user1 not in users or user2 not in users:
-        return None, None
+        return [], []
     user1, user2 = user1.strip(), user2.strip()
-    solved_challenges_1 = challenges_solved_by_user(s, tables, user1)
-    solved_challenges_2 = challenges_solved_by_user(s, tables, user2)
+    solved_challenges_1 = challenges_solved_by_user(s, tables, user1, user_type=user_type)
+    solved_challenges_2 = challenges_solved_by_user(s, tables, user2, user_type=user_type)
     all_challs = solved_challenges_1 + solved_challenges_2
     diff1 = [item for item in all_challs if item in solved_challenges_1 and item not in solved_challenges_2]
     diff2 = [item for item in all_challs if item in solved_challenges_2 and item not in solved_challenges_1]
     return diff1, diff2
 
 
-def track_user(s: Session, tables: CTFdTables, user: str) -> List[str]:
+def track_user(s: Session, tables: CTFdTables, user: str, user_type: str = 'all') -> List[str]:
     user = user.strip()
-    if not user_exists(s, tables, user):
-        return None
+    if not user_exists(s, tables, user, user_type=user_type):
+        return []
     ips = s.query(tables.tracking.ip). \
         join(tables.users, tables.users.id == tables.tracking.user_id). \
         filter(tables.users.name == user). \
@@ -173,14 +185,14 @@ def track_user(s: Session, tables: CTFdTables, user: str) -> List[str]:
     return sorted(ips, key=lambda ip: struct.unpack("!L", socket.inet_aton(ip))[0])
 
 
-def get_challenges_solved(s: Session, tables: CTFdTables) -> List:
+def get_challenges_solved(s: Session, tables: CTFdTables, user_type: str = 'all') -> List:
     challenges = s.query(tables.submissions). \
         join(tables.challenges, tables.challenges.id == tables.submissions.challenge_id). \
         join(tables.users, tables.users.id == tables.submissions.user_id). \
-        filter(tables.submissions.type == 'correct'). \
-        filter(tables.users.type == 'user'). \
-        order_by(desc(tables.submissions.date)).all()
-    return challenges
+        filter(tables.submissions.type == 'correct')
+    if user_type != 'all':
+        challenges = challenges.filter(tables.users.type == user_type)
+    return challenges.order_by(desc(tables.submissions.date)).all()
 
 
 def get_tag(challenge: Any) -> str:
@@ -198,10 +210,10 @@ def select_challenges_by_tags(challenges: List, tag: str) -> List[Any]:
     return selected_challenges[::-1]  # sort from oldest to newest
 
 
-def get_new_challenges(s: Session, tables: CTFdTables, tag: str) -> Tuple[str, Dict]:
+def get_new_challenges(s: Session, tables: CTFdTables, tag: str, user_type: str = 'all') -> Tuple[str, Dict]:
     new_challenge = dict()
     new_tag = None
-    challenges = get_challenges_solved(s, tables)
+    challenges = get_challenges_solved(s, tables, user_type=user_type)
 
     if tag is None:
         if len(challenges) > 0:

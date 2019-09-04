@@ -1,10 +1,7 @@
-bot_channel = 'ctf-news'
-db_uri = 'mysql+pymysql://root:ctfd@127.0.0.1:3306/ctfd'
-emoji1 = 'dab'
-emoji2 = 'ok_hand'
-emoji3 = 'thinking'
-emoji4 = 'thinking'
-emoji5 = 'thumbsdown'
-limit_size = 1000
-medals = [':first_place:', ':second_place:', ':third_place:']
-token = 'token'
+BOT_CHANNEL = 'ctf-news'
+DB_URI = 'mysql+pymysql://root:ctfd@127.0.0.1:3306/ctfd'
+CTFD_MODE = 'users'  # users or teams
+CATCH_MODE = 'all'  # all or user or admin
+LIMIT_SIZE = 1000
+MEDALS = [':first_place:', ':second_place:', ':third_place:']
+TOKEN = 'token'
