@@ -4,28 +4,64 @@
 #
 #    pip-compile
 #
-aiohttp==3.5.4            # via discord.py
-async-timeout==3.0.1      # via aiohttp
+aiohttp==3.5.4
+    # via discord.py
+async-timeout==3.0.1
+    # via aiohttp
 asyncio==3.4.3
-atomicwrites==1.3.0       # via pytest
-attrs==19.1.0             # via aiohttp, packaging, pytest
-chardet==3.0.4            # via aiohttp
+    # via -r requirements.in
+atomicwrites==1.3.0
+    # via pytest
+attrs==19.1.0
+    # via
+    #   aiohttp
+    #   packaging
+    #   pytest
+chardet==3.0.4
+    # via aiohttp
 discord.py==1.2.3
+    # via
+    #   -r requirements.in
+    #   discord
 discord==1.0.1
-idna==2.8                 # via yarl
-importlib-metadata==0.19  # via pluggy, pytest
-more-itertools==7.2.0     # via pytest
-multidict==4.5.2          # via aiohttp, yarl
-packaging==19.1           # via pytest
-pluggy==0.12.0            # via pytest
-py==1.8.0                 # via pytest
+    # via -r requirements.in
+idna==2.8
+    # via yarl
+importlib-metadata==0.19
+    # via
+    #   pluggy
+    #   pytest
+more-itertools==7.2.0
+    # via pytest
+multidict==4.5.2
+    # via
+    #   aiohttp
+    #   yarl
+packaging==19.1
+    # via pytest
+pluggy==0.12.0
+    # via pytest
+py==1.10.0
+    # via pytest
 pymysql==0.9.3
-pyparsing==2.4.2          # via packaging
+    # via -r requirements.in
+pyparsing==2.4.2
+    # via packaging
 pytest==5.0.1
-six==1.12.0               # via packaging, structlog
+    # via -r requirements.in
+six==1.12.0
+    # via
+    #   packaging
+    #   structlog
 sqlalchemy==1.3.6
+    # via -r requirements.in
 structlog==19.1.0
-wcwidth==0.1.7            # via pytest
-websockets==6.0           # via discord.py
-yarl==1.3.0               # via aiohttp
-zipp==0.5.2               # via importlib-metadata
+    # via -r requirements.in
+wcwidth==0.1.7
+    # via pytest
+websockets==6.0
+    # via discord.py
+yarl==1.3.0
+    # via aiohttp
+zipp==0.5.2
+    # via importlib-metadata
